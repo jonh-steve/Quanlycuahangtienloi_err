@@ -8,11 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace QuanLyCuaHangTienLoi.Forms
+namespace QuanLyCuaHangTienLoi.Forms.Admin
 {
-    public partial class POSForm : Form
+    public partial class SystemConfigForm : Form
     {
-        public POSForm()
+        public SystemConfigForm()
         {
             InitializeComponent();
         }

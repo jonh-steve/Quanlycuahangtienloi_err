@@ -8,11 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace QuanLyCuaHangTienLoi.Forms
+namespace QuanLyCuaHangTienLoi.Forms.Orders
 {
-    public partial class OrderListForm : Form
+    public partial class CreateOrderForm : Form
     {
-        public OrderListForm()
+        public CreateOrderForm()
         {
             InitializeComponent();
         }

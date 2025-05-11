@@ -45,6 +45,18 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>packages\EntityFramework.6.5.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="itextsharp, Version=5.5.13.4, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>packages\iTextSharp.5.5.13.4\lib\net461\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="LiveCharts, Version=0.9.8.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
+      <HintPath>packages\LiveCharts.WinForms.NetCore3.0.9.8\lib\net45\LiveCharts.dll</HintPath>
+    </Reference>
+    <Reference Include="LiveCharts.WinForms, Version=0.7.1.5, Culture=neutral, PublicKeyToken=1f1e67602fe23622, processorArchitecture=MSIL">
+      <HintPath>packages\LiveCharts.WinForms.0.7.1.5\lib\net461\LiveCharts.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="LiveCharts.Wpf, Version=0.9.8.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
+      <HintPath>packages\LiveCharts.WinForms.NetCore3.0.9.8\lib\net45\LiveCharts.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="log4net, Version=3.0.4.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>packages\log4net.3.0.4\lib\net462\log4net.dll</HintPath>
     </Reference>
@@ -78,9 +90,23 @@
     <Reference Include="Microsoft.Extensions.Primitives, Version=9.0.0.4, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Extensions.Primitives.9.0.4\lib\net462\Microsoft.Extensions.Primitives.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.ReportViewer.Common, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Reporting.WinForms.v11.1.0.0.0\lib\Microsoft.ReportViewer.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.ProcessingObjectModel, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Reporting.WinForms.v11.1.0.0.0\lib\Microsoft.ReportViewer.ProcessingObjectModel.DLL</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ReportViewer.WinForms, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Reporting.WinForms.v11.1.0.0.0\lib\Microsoft.ReportViewer.WinForms.DLL</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.SqlServer.Types, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Reporting.WinForms.v11.1.0.0.0\lib\Microsoft.SqlServer.Types.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
@@ -109,6 +135,7 @@
       <HintPath>packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Web" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -118,6 +145,9 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="UIAutomationProvider" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compoment\NotificationManager.cs">
@@ -139,15 +169,105 @@
     <Compile Include="Db\Repositories\AccountRepository.cs" />
     <Compile Include="Db\Repositories\CategoryRepository.cs" />
     <Compile Include="Db\Repositories\CustomerRepository.cs" />
-    <Compile Include="Db\Repositories\CustomerService.cs" />
     <Compile Include="Db\Repositories\IAccountRepository.cs" />
     <Compile Include="Db\Repositories\ICategoryRepository.cs" />
     <Compile Include="Db\Repositories\ICustomerRepository.cs" />
     <Compile Include="Db\Repositories\IInventoryRepository.cs" />
     <Compile Include="Db\Repositories\ImportRepository.cs" />
     <Compile Include="Db\Repositories\InventoryRepository.cs" />
-    <Compile Include="Db\Repositories\IOrderDetailRepository.cs" />
-    <Compile Include="Db\Repositories\IOrderRepository.cs" />
+    <Compile Include="Db\Repositories\IReportRepository.cs" />
+    <Compile Include="Forms\Admin\SystemConfigForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Admin\SystemConfigForm.Designer.cs">
+      <DependentUpon>SystemConfigForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Controls\CustomerQuickAddControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Controls\CustomerQuickAddControl.Designer.cs">
+      <DependentUpon>CustomerQuickAddControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Controls\CustomerSelectorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Controls\CustomerSelectorControl.Designer.cs">
+      <DependentUpon>CustomerSelectorControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Controls\DateRangeSelectorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Controls\DateRangeSelectorControl.Designer.cs">
+      <DependentUpon>DateRangeSelectorControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Controls\ProductSelectorControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Controls\ProductSelectorControl.Designer.cs">
+      <DependentUpon>ProductSelectorControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Customers\CustomerPointForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Customers\CustomerPointForm.Designer.cs">
+      <DependentUpon>CustomerPointForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Customers\CustomerInfoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Customers\CustomerInfoForm.Designer.cs">
+      <DependentUpon>CustomerInfoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Inventory\ImportProductForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Inventory\ImportProductForm.Designer.cs">
+      <DependentUpon>ImportProductForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Orders\CreateOrderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Orders\CreateOrderForm.Designer.cs">
+      <DependentUpon>CreateOrderForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Reports\CustomerReportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Reports\CustomerReportForm.Designer.cs">
+      <DependentUpon>CustomerReportForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Reports\DashboardForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Reports\DashboardForm.Designer.cs">
+      <DependentUpon>DashboardForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Reports\InventoryReportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Reports\InventoryReportForm.Designer.cs">
+      <DependentUpon>InventoryReportForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Reports\SalesReportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Reports\SalesReportForm.Designer.cs">
+      <DependentUpon>SalesReportForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Models\DTO\CategoryDTO.cs" />
+    <Compile Include="Models\DTO\CustomerDTO.cs" />
+    <Compile Include="Models\DTO\CustomerPointHistoryDTO.cs" />
+    <Compile Include="Models\DTO\SalesReportDTO.cs" />
+    <Compile Include="Models\DTO\SupplierDTO.cs" />
+    <Compile Include="Models\Entities\Category.cs" />
+    <Compile Include="Models\Entities\Customer.cs" />
+    <Compile Include="Models\Entities\CustomerPoint.cs" />
+    <Compile Include="Models\Entities\Employee.cs" />
+    <Compile Include="Models\Entities\MembershipLevel.cs" />
+    <Compile Include="Models\Entities\Order.cs" />
+    <Compile Include="Models\Entities\OrderDetail.cs" />
+    <Compile Include="Models\Interfaces\IOrderDetailRepository.cs" />
+    <Compile Include="Models\Interfaces\IOrderRepository.cs" />
     <Compile Include="Db\Repositories\LoyaltyPointProcessor.cs" />
     <Compile Include="Db\Repositories\OrderDetailRepository.cs" />
     <Compile Include="Db\Repositories\OrderRepository.cs" />
@@ -241,17 +361,23 @@
     <Compile Include="Forms\Inventory\InventoryListForm.Designer.cs">
       <DependentUpon>InventoryListForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\OrderDetailForm.cs">
+    <Compile Include="Forms\Orders\OrderDetailForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\OrderDetailForm.Designer.cs">
+    <Compile Include="Forms\Orders\OrderDetailForm.Designer.cs">
       <DependentUpon>OrderDetailForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\OrderListForm.cs">
+    <Compile Include="Forms\Orders\OrderListForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\OrderListForm.Designer.cs">
+    <Compile Include="Forms\Orders\OrderListForm.Designer.cs">
       <DependentUpon>OrderListForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Orders\OrderPaymentForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Orders\OrderPaymentForm.Designer.cs">
+      <DependentUpon>OrderPaymentForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\PaymentForm.cs">
       <SubType>Form</SubType>
@@ -259,18 +385,21 @@
     <Compile Include="Forms\PaymentForm.Designer.cs">
       <DependentUpon>PaymentForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\POSForm.cs">
+    <Compile Include="Forms\Orders\POSForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\POSForm.Designer.cs">
+    <Compile Include="Forms\Orders\POSForm.Designer.cs">
       <DependentUpon>POSForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\ProductSelectionForm.cs">
+    <Compile Include="Forms\Products\ProductSelectionForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\ProductSelectionForm.Designer.cs">
+    <Compile Include="Forms\Products\ProductSelectionForm.Designer.cs">
       <DependentUpon>ProductSelectionForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Services\CustomerPointService.cs" />
+    <Compile Include="Services\CustomerService.cs" />
+    <Compile Include="Services\ICustomerService.cs" />
     <Compile Include="Services\IImportService.cs" />
     <Compile Include="Services\IInventoryService.cs" />
     <Compile Include="Db\Repositories\IImportRepository.cs" />
@@ -312,10 +441,10 @@
     <Compile Include="Forms\BaseForm.Designer.cs">
       <DependentUpon>BaseForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\CategoryManagementForm.cs">
+    <Compile Include="Forms\Products\CategoryManagementForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\CategoryManagementForm.Designer.cs">
+    <Compile Include="Forms\Products\CategoryManagementForm.Designer.cs">
       <DependentUpon>CategoryManagementForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\Controls\CategorySelector.cs">
@@ -411,11 +540,14 @@
     <Compile Include="Services\IAccountService.cs" />
     <Compile Include="Services\ICategoryService.cs" />
     <Compile Include="Services\ImportService.cs" />
+    <Compile Include="Services\Interfaces\IOrderService.cs" />
     <Compile Include="Services\InventoryService.cs" />
     <Compile Include="Services\IProductService.cs" />
+    <Compile Include="Services\IReportService.cs" />
     <Compile Include="Services\OrderService.cs" />
     <Compile Include="Services\PaymentProcessor.cs" />
     <Compile Include="Services\ProductService.cs" />
+    <Compile Include="Services\ReportService.cs" />
     <Compile Include="Utils\BarcodeScanner.cs" />
     <Compile Include="Utils\Constants.cs" />
     <Compile Include="Utils\Extensions.cs" />
@@ -423,6 +555,7 @@
     <Compile Include="Utils\InventoryTransactionLogger.cs" />
     <Compile Include="Utils\MapperHelper.cs" />
     <Compile Include="Utils\ReceiptPrinter.cs" />
+    <Compile Include="Utils\ReportExporter.cs" />
     <Compile Include="Utils\Security.cs" />
     <Compile Include="Utils\Validators.cs" />
     <EmbeddedResource Include="Forms\Admin\UserManagementForm.resx">
@@ -447,6 +580,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="Config\app.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

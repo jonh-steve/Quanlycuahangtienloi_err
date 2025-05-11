@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QuanLyCuaHangTienLoi.Db.Repositories
+namespace QuanLyCuaHangTienLoi.Models.Entities
 {
-    internal class CustomerService
+    internal class Category
     {
     }
 }
