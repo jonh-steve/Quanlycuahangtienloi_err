@@ -10,6 +10,7 @@ using iTextSharp.text;
 using iTextSharp.text.pdf;
 using System.Collections.Generic;
 using System.Linq;
+using Font = iTextSharp.text.Font;
 
 namespace QuanLyCuaHangTienLoi.Utils
 {

@@ -24,7 +24,7 @@ namespace QuanLyCuaHangTienLoi.Services
             }
         }
 
-        private AccountService()
+        public AccountService()
         {
             _accountRepository = new AccountRepository();
         }

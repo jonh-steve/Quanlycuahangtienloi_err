@@ -1,0 +1,16 @@
+node_modules
+dist
+*.log
+*.tsbuildinfo
+*.vscode
+*.vscodeignore
+*.vscodeignore
+node_modules/
+dist
+*.log
+bin/
+obj/
+.vs/
+*.suo
+*.user
+packages/

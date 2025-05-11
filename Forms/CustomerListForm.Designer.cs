@@ -1,4 +1,4 @@
-﻿namespace QuanLyCuaHangTienLoi.Forms
+﻿namespace QuanLyCuaHangTienLoi.Forms.Customers
 {
     partial class CustomerListForm
     {

@@ -5,6 +5,7 @@ using QuanLyCuaHangTienLoi.Services;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using QuanLyCuaHangTienLoi.Forms.Products;
 
 namespace QuanLyCuaHangTienLoi
 {
@@ -26,7 +27,7 @@ namespace QuanLyCuaHangTienLoi
         
         // Status strip items
         private ToolStripStatusLabel _statusUser;
-
+        
         public MainForm()
         {
             InitializeComponent();

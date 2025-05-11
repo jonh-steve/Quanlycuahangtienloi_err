@@ -1,0 +1,10 @@
+node_modules/
+dist
+*.log
+bin/
+obj/
+.vs/
+*.suo
+*.user
+packages/
+.git/*
