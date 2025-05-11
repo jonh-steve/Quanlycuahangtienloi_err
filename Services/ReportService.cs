@@ -1,312 +1,439 @@
-﻿// Steve-Thuong_hai
-// Bổ sung cho ReportService.cs
-
+﻿// File: Services/ReportService.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using QuanLyCuaHangTienLoi.Models.DTO;
 using QuanLyCuaHangTienLoi.Db.Repositories;
-using QuanLyCuaHangTienLoi.Models.Repositories;
+using QuanLyCuaHangTienLoi.Models.DTO;
+using QuanLyCuaHangTienLoi.Models.Interfaces;
+using QuanLyCuaHangTienLoi.Utils;
 
 namespace QuanLyCuaHangTienLoi.Services
 {
-    // Thêm các DTO cho báo cáo doanh số
-    public class DailySalesReportDTO
+    public class ReportService : IReportService
     {
-        public DateTime SalesDate { get; set; }
-        public int OrderCount { get; set; }
-        public decimal TotalSales { get; set; }
-        public decimal TotalTax { get; set; }
-        public decimal NetSales { get; set; }
-    }
+        private readonly IOrderRepository _orderRepository;
+        private readonly IProductRepository _productRepository;
+        private readonly IInventoryRepository _inventoryRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
-    public class ProductSalesReportDTO
-    {
-        public int ProductID { get; set; }
-        public string ProductCode { get; set; }
-        public string ProductName { get; set; }
-        public string CategoryName { get; set; }
-        public int QuantitySold { get; set; }
-        public decimal TotalSales { get; set; }
-        public decimal Profit { get; set; }
-    }
+        // Cache cho báo cáo để tối ưu hiệu suất
+        private static Dictionary<string, object> _reportCache = new Dictionary<string, object>();
+        private static readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(15);
+        private static Dictionary<string, DateTime> _cacheExpirationTimes = new Dictionary<string, DateTime>();
 
-    public class CategorySalesReportDTO
-    {
-        public int CategoryID { get; set; }
-        public string CategoryName { get; set; }
-        public int ProductCount { get; set; }
-        public int QuantitySold { get; set; }
-        public decimal TotalSales { get; set; }
-        public decimal Profit { get; set; }
-        public decimal Percentage { get; set; }
-    }
-
-    public partial class ReportService
-    {
-        // Bổ sung các properties
-        private readonly OrderRepository _orderRepository;
-        private readonly ProductRepository _productRepository;
-
-        // Bổ sung constructor
-        public ReportService(CustomerRepository customerRepository,
-            OrderRepository orderRepository, ProductRepository productRepository)
+        public ReportService(
+            IOrderRepository orderRepository,
+            IProductRepository productRepository,
+            IInventoryRepository inventoryRepository,
+            ICategoryRepository categoryRepository)
         {
-            _customerRepository = customerRepository;
             _orderRepository = orderRepository;
             _productRepository = productRepository;
-            _logger = new Logger();
+            _inventoryRepository = inventoryRepository;
+            _categoryRepository = categoryRepository;
         }
 
-        // Phương thức lấy báo cáo doanh số theo ngày
-        public List<DailySalesReportDTO> GetSalesReport(DateTime startDate, DateTime endDate)
+        public SalesReportDTO GetSalesReport(DateTime startDate, DateTime endDate)
         {
-            try
+            string cacheKey = $"SalesReport_{startDate:yyyyMMdd}_{endDate:yyyyMMdd}";
+
+            // Kiểm tra cache
+            if (_reportCache.ContainsKey(cacheKey) &&
+                _cacheExpirationTimes.ContainsKey(cacheKey) &&
+                _cacheExpirationTimes[cacheKey] > DateTime.Now)
             {
-                // Gọi stored procedure để lấy dữ liệu
-                var report = _orderRepository.GetDailySalesReport(startDate, endDate);
-
-                if (report == null || !report.Any())
-                {
-                    return new List<DailySalesReportDTO>();
-                }
-
-                // Chuyển đổi dữ liệu từ dynamic sang DTO
-                var result = new List<DailySalesReportDTO>();
-
-                foreach (var item in report)
-                {
-                    result.Add(new DailySalesReportDTO
-                    {
-                        SalesDate = item.SalesDate,
-                        OrderCount = item.OrderCount,
-                        TotalSales = item.GrossSales,
-                        TotalTax = item.TotalTax,
-                        NetSales = item.NetSales
-                    });
-                }
-
-                return result;
+                return (SalesReportDTO)_reportCache[cacheKey];
             }
-            catch (Exception ex)
+
+            // Nếu không có trong cache hoặc cache đã hết hạn, truy vấn dữ liệu
+            var orders = _orderRepository.GetOrdersByDateRange(startDate, endDate, "Paid");
+
+            var salesReport = new SalesReportDTO
             {
-                _logger.Log($"Lỗi khi lấy báo cáo doanh số: {ex.Message}", LogLevel.Error);
-                throw;
-            }
+                StartDate = startDate,
+                EndDate = endDate,
+                TotalOrders = orders.Count,
+                TotalSales = orders.Sum(o => o.FinalAmount),
+                AverageOrderValue = orders.Count > 0 ? orders.Average(o => o.FinalAmount) : 0
+            };
+
+            // Tính toán doanh số theo ngày
+            salesReport.DailySales = CalculateDailySales(orders, startDate, endDate);
+
+            // Lấy top sản phẩm bán chạy
+            salesReport.TopProducts = GetTopSellingProducts(startDate, endDate, 10);
+
+            // Lấy thống kê phương thức thanh toán
+            salesReport.PaymentMethodStats = GetPaymentMethodStats(orders);
+
+            // Lấy chi tiết doanh số
+            salesReport.DetailedSales = GetDetailedSales(orders);
+
+            // Lưu vào cache
+            _reportCache[cacheKey] = salesReport;
+            _cacheExpirationTimes[cacheKey] = DateTime.Now.Add(_cacheExpiration);
+
+            return salesReport;
         }
 
-        // Phương thức lấy báo cáo doanh số theo sản phẩm
-        public List<ProductSalesReportDTO> GetProductSalesReport(DateTime startDate, DateTime endDate)
+        public ProfitReportDTO GetProfitReport(DateTime startDate, DateTime endDate)
         {
-            try
+            string cacheKey = $"ProfitReport_{startDate:yyyyMMdd}_{endDate:yyyyMMdd}";
+
+            // Kiểm tra cache
+            if (_reportCache.ContainsKey(cacheKey) &&
+                _cacheExpirationTimes.ContainsKey(cacheKey) &&
+                _cacheExpirationTimes[cacheKey] > DateTime.Now)
             {
-                // Gọi stored procedure để lấy dữ liệu
-                var report = _productRepository.GetProductSalesReport(startDate, endDate);
-
-                if (report == null || !report.Any())
-                {
-                    return new List<ProductSalesReportDTO>();
-                }
-
-                // Chuyển đổi dữ liệu từ dynamic sang DTO
-                var result = new List<ProductSalesReportDTO>();
-
-                foreach (var item in report)
-                {
-                    result.Add(new ProductSalesReportDTO
-                    {
-                        ProductID = item.ProductID,
-                        ProductCode = item.ProductCode,
-                        ProductName = item.ProductName,
-                        CategoryName = item.CategoryName,
-                        QuantitySold = item.TotalQuantitySold,
-                        TotalSales = item.TotalSales,
-                        Profit = item.EstimatedProfit
-                    });
-                }
-
-                return result;
+                return (ProfitReportDTO)_reportCache[cacheKey];
             }
-            catch (Exception ex)
+
+            // Nếu không có trong cache hoặc cache đã hết hạn, truy vấn dữ liệu
+            var orders = _orderRepository.GetOrdersByDateRange(startDate, endDate, "Paid");
+
+            // Tính tổng doanh thu
+            decimal totalRevenue = orders.Sum(o => o.FinalAmount);
+
+            // Tính tổng chi phí (giá vốn)
+            decimal totalCost = _orderRepository.GetTotalCostForDateRange(startDate, endDate);
+
+            // Tính lợi nhuận
+            decimal grossProfit = totalRevenue - totalCost;
+
+            // Tính lợi nhuận theo ngày
+            var dailyProfits = CalculateDailyProfits(startDate, endDate);
+
+            // Tính lợi nhuận theo danh mục
+            var categoryProfits = CalculateCategoryProfits(startDate, endDate);
+
+            var profitReport = new ProfitReportDTO
             {
-                _logger.Log($"Lỗi khi lấy báo cáo doanh số theo sản phẩm: {ex.Message}", LogLevel.Error);
-                throw;
-            }
+                StartDate = startDate,
+                EndDate = endDate,
+                TotalRevenue = totalRevenue,
+                TotalCost = totalCost,
+                GrossProfit = grossProfit,
+                GrossProfitMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0,
+                DailyProfits = dailyProfits,
+                CategoryProfits = categoryProfits
+            };
+
+            // Lưu vào cache
+            _reportCache[cacheKey] = profitReport;
+            _cacheExpirationTimes[cacheKey] = DateTime.Now.Add(_cacheExpiration);
+
+            return profitReport;
         }
 
-        // Phương thức lấy báo cáo doanh số theo danh mục
-        public List<CategorySalesReportDTO> GetCategorySalesReport(DateTime startDate, DateTime endDate)
+        public ProductPerformanceReportDTO GetProductPerformanceReport(DateTime startDate, DateTime endDate, int topCount = 20)
         {
-            try
+            string cacheKey = $"ProductPerformanceReport_{startDate:yyyyMMdd}_{endDate:yyyyMMdd}_{topCount}";
+
+            // Kiểm tra cache
+            if (_reportCache.ContainsKey(cacheKey) &&
+                _cacheExpirationTimes.ContainsKey(cacheKey) &&
+                _cacheExpirationTimes[cacheKey] > DateTime.Now)
             {
-                // Gọi stored procedure để lấy dữ liệu
-                var report = _productRepository.GetCategorySalesReport(startDate, endDate);
-
-                if (report == null || !report.Any())
-                {
-                    return new List<CategorySalesReportDTO>();
-                }
-
-                // Chuyển đổi dữ liệu từ dynamic sang DTO
-                var result = new List<CategorySalesReportDTO>();
-
-                // Tính tổng doanh thu để tính tỷ lệ phần trăm
-                decimal totalSales = report.Sum(r => r.TotalSales);
-
-                foreach (var item in report)
-                {
-                    result.Add(new CategorySalesReportDTO
-                    {
-                        CategoryID = item.CategoryID,
-                        CategoryName = item.CategoryName,
-                        ProductCount = item.ProductCount,
-                        QuantitySold = item.TotalQuantitySold,
-                        TotalSales = item.TotalSales,
-                        Profit = item.TotalProfit,
-                        Percentage = totalSales > 0 ? item.TotalSales / totalSales : 0
-                    });
-                }
-
-                return result;
+                return (ProductPerformanceReportDTO)_reportCache[cacheKey];
             }
-            catch (Exception ex)
+
+            // Nếu không có trong cache hoặc cache đã hết hạn, truy vấn dữ liệu
+            var topProducts = GetTopSellingProducts(startDate, endDate, topCount);
+            var worstProducts = GetWorstSellingProducts(startDate, endDate, topCount);
+            var productsProfitability = GetProductsProfitability(startDate, endDate, topCount);
+
+            var productPerformanceReport = new ProductPerformanceReportDTO
             {
-                _logger.Log($"Lỗi khi lấy báo cáo doanh số theo danh mục: {ex.Message}", LogLevel.Error);
-                throw;
-            }
-        }
-        // Phương thức xuất báo cáo doanh số ra Excel
-        public bool ExportSalesReportToExcel(string filePath, DateTime startDate, DateTime endDate)
-        {
-            try
-            {
-                // Lấy dữ liệu báo cáo
-                var salesReport = GetSalesReport(startDate, endDate);
-                var productSalesReport = GetProductSalesReport(startDate, endDate);
-                var categorySalesReport = GetCategorySalesReport(startDate, endDate);
+                StartDate = startDate,
+                EndDate = endDate,
+                TopSellingProducts = topProducts,
+                WorstSellingProducts = worstProducts,
+                MostProfitableProducts = productsProfitability
+            };
 
-                _logger.Log($"Xuất báo cáo doanh số ra Excel: {filePath}", LogLevel.Info);
+            // Lưu vào cache
+            _reportCache[cacheKey] = productPerformanceReport;
+            _cacheExpirationTimes[cacheKey] = DateTime.Now.Add(_cacheExpiration);
 
-                // Tạo thư mục chứa file nếu chưa tồn tại
-                string directory = System.IO.Path.GetDirectoryName(filePath);
-                if (!System.IO.Directory.Exists(directory))
-                {
-                    System.IO.Directory.CreateDirectory(directory);
-                }
-
-                // Trong thực tế, sẽ sử dụng EPPlus để xuất Excel
-                // Đây là mô phỏng xuất Excel
-                using (var package = new OfficeOpenXml.ExcelPackage())
-                {
-                    // Tạo sheet Tổng quan
-                    var summarySheet = package.Workbook.Worksheets.Add("Tổng quan");
-                    summarySheet.Cells[1, 1].Value = $"BÁO CÁO DOANH SỐ BÁN HÀNG ({startDate:dd/MM/yyyy} - {endDate:dd/MM/yyyy})";
-                    summarySheet.Cells[1, 1, 1, 6].Merge = true;
-
-                    // Thêm thông tin tổng quan
-                    summarySheet.Cells[3, 1].Value = "Tổng số đơn hàng:";
-                    summarySheet.Cells[3, 2].Value = salesReport.Sum(s => s.OrderCount);
-
-                    summarySheet.Cells[4, 1].Value = "Tổng doanh thu:";
-                    summarySheet.Cells[4, 2].Value = salesReport.Sum(s => s.TotalSales);
-
-                    summarySheet.Cells[5, 1].Value = "Tổng thuế:";
-                    summarySheet.Cells[5, 2].Value = salesReport.Sum(s => s.TotalTax);
-
-                    summarySheet.Cells[6, 1].Value = "Doanh thu thuần:";
-                    summarySheet.Cells[6, 2].Value = salesReport.Sum(s => s.NetSales);
-
-                    // Tạo sheet Doanh số theo ngày
-                    var dailySheet = package.Workbook.Worksheets.Add("Doanh số theo ngày");
-                    dailySheet.Cells[1, 1].Value = "Ngày";
-                    dailySheet.Cells[1, 2].Value = "Số đơn hàng";
-                    dailySheet.Cells[1, 3].Value = "Doanh thu";
-                    dailySheet.Cells[1, 4].Value = "Thuế";
-                    dailySheet.Cells[1, 5].Value = "Doanh thu thuần";
-
-                    // Thêm dữ liệu doanh số theo ngày
-                    int row = 2;
-                    foreach (var item in salesReport)
-                    {
-                        dailySheet.Cells[row, 1].Value = item.SalesDate.ToString("dd/MM/yyyy");
-                        dailySheet.Cells[row, 2].Value = item.OrderCount;
-                        dailySheet.Cells[row, 3].Value = item.TotalSales;
-                        dailySheet.Cells[row, 4].Value = item.TotalTax;
-                        dailySheet.Cells[row, 5].Value = item.NetSales;
-                        row++;
-                    }
-
-                    // Tạo sheet Doanh số theo sản phẩm
-                    var productSheet = package.Workbook.Worksheets.Add("Doanh số theo sản phẩm");
-                    productSheet.Cells[1, 1].Value = "STT";
-                    productSheet.Cells[1, 2].Value = "Mã SP";
-                    productSheet.Cells[1, 3].Value = "Tên sản phẩm";
-                    productSheet.Cells[1, 4].Value = "Danh mục";
-                    productSheet.Cells[1, 5].Value = "Số lượng bán";
-                    productSheet.Cells[1, 6].Value = "Doanh thu";
-                    productSheet.Cells[1, 7].Value = "Lợi nhuận";
-
-                    // Thêm dữ liệu doanh số theo sản phẩm
-                    row = 2;
-                    foreach (var item in productSalesReport)
-                    {
-                        productSheet.Cells[row, 1].Value = row - 1;
-                        productSheet.Cells[row, 2].Value = item.ProductCode;
-                        productSheet.Cells[row, 3].Value = item.ProductName;
-                        productSheet.Cells[row, 4].Value = item.CategoryName;
-                        productSheet.Cells[row, 5].Value = item.QuantitySold;
-                        productSheet.Cells[row, 6].Value = item.TotalSales;
-                        productSheet.Cells[row, 7].Value = item.Profit;
-                        row++;
-                    }
-
-                    // Lưu file Excel
-                    var fileInfo = new System.IO.FileInfo(filePath);
-                    package.SaveAs(fileInfo);
-                }
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.Log($"Lỗi khi xuất báo cáo doanh số ra Excel: {ex.Message}", LogLevel.Error);
-                throw;
-            }
+            return productPerformanceReport;
         }
 
-        // Phương thức xuất báo cáo doanh số ra PDF
-        public bool ExportSalesReportToPdf(string filePath, DateTime startDate, DateTime endDate)
+        public InventoryReportDTO GetInventoryReport()
         {
-            try
+            string cacheKey = "InventoryReport";
+
+            // Kiểm tra cache
+            if (_reportCache.ContainsKey(cacheKey) &&
+                _cacheExpirationTimes.ContainsKey(cacheKey) &&
+                _cacheExpirationTimes[cacheKey] > DateTime.Now)
             {
-                // Lấy dữ liệu báo cáo
-                var salesReport = GetSalesReport(startDate, endDate);
-                var productSalesReport = GetProductSalesReport(startDate, endDate);
-                var categorySalesReport = GetCategorySalesReport(startDate, endDate);
-
-                _logger.Log($"Xuất báo cáo doanh số ra PDF: {filePath}", LogLevel.Info);
-
-                // Tạo thư mục chứa file nếu chưa tồn tại
-                string directory = System.IO.Path.GetDirectoryName(filePath);
-                if (!System.IO.Directory.Exists(directory))
-                {
-                    System.IO.Directory.CreateDirectory(directory);
-                }
-
-                // Trong thực tế, sẽ sử dụng iTextSharp để xuất PDF
-                // Đây là mô phỏng xuất PDF
-                using (System.IO.FileStream fs = System.IO.File.Create(filePath))
-                {
-                    // Trong thực tế, sẽ sử dụng iTextSharp để tạo nội dung PDF
-                }
-
-                return true;
+                return (InventoryReportDTO)_reportCache[cacheKey];
             }
-            catch (Exception ex)
+
+            var inventoryItems = _inventoryRepository.GetAllInventory();
+            var products = _productRepository.GetAllProducts();
+
+            // Tính tổng giá trị tồn kho
+            decimal totalInventoryValue = inventoryItems.Sum(i => i.Quantity * products.FirstOrDefault(p => p.ProductID == i.ProductID)?.CostPrice ?? 0);
+
+            // Tìm các sản phẩm sắp hết hàng
+            var lowStockProducts = inventoryItems
+                .Where(i => i.Quantity <= products.FirstOrDefault(p => p.ProductID == i.ProductID)?.MinimumStock)
+                .Select(i => new LowStockProductDTO
+                {
+                    ProductID = i.ProductID,
+                    ProductName = products.FirstOrDefault(p => p.ProductID == i.ProductID)?.ProductName,
+                    CurrentStock = i.Quantity,
+                    MinimumStock = products.FirstOrDefault(p => p.ProductID == i.ProductID)?.MinimumStock ?? 0,
+                    ReorderQuantity = (products.FirstOrDefault(p => p.ProductID == i.ProductID)?.MinimumStock ?? 0) * 2 - i.Quantity
+                })
+                .ToList();
+
+            // Phân tích tồn kho theo danh mục
+            var inventoryByCategory = GetInventoryByCategory();
+
+            var inventoryReport = new InventoryReportDTO
             {
-                _logger.Log($"Lỗi khi xuất báo cáo doanh số ra PDF: {ex.Message}", LogLevel.Error);
-                throw;
+                TotalProducts = products.Count,
+                TotalInventoryValue = totalInventoryValue,
+                LowStockProducts = lowStockProducts,
+                InventoryByCategory = inventoryByCategory,
+                InventoryDetails = inventoryItems.Select(i => new InventoryDetailDTO
+                {
+                    ProductID = i.ProductID,
+                    ProductName = products.FirstOrDefault(p => p.ProductID == i.ProductID)?.ProductName,
+                    CategoryName = products.FirstOrDefault(p => p.ProductID == i.ProductID)?.CategoryName,
+                    CurrentStock = i.Quantity,
+                    UnitCost = products.FirstOrDefault(p => p.ProductID == i.ProductID)?.CostPrice ?? 0,
+                    TotalValue = i.Quantity * (products.FirstOrDefault(p => p.ProductID == i.ProductID)?.CostPrice ?? 0),
+                    LastUpdated = i.LastUpdated
+                }).ToList()
+            };
+
+            // Lưu vào cache
+            _reportCache[cacheKey] = inventoryReport;
+            _cacheExpirationTimes[cacheKey] = DateTime.Now.Add(_cacheExpiration);
+
+            return inventoryReport;
+        }
+
+        public DashboardSummaryDTO GetDashboardSummary()
+        {
+            string cacheKey = "DashboardSummary";
+
+            // Kiểm tra cache
+            if (_reportCache.ContainsKey(cacheKey) &&
+                _cacheExpirationTimes.ContainsKey(cacheKey) &&
+                _cacheExpirationTimes[cacheKey] > DateTime.Now)
+            {
+                return (DashboardSummaryDTO)_reportCache[cacheKey];
             }
+
+            // Tính toán dữ liệu dashboard
+            var today = DateTime.Today;
+            var yesterday = today.AddDays(-1);
+            var lastWeekStart = today.AddDays(-7);
+            var lastMonthStart = today.AddMonths(-1);
+
+            // Doanh số hôm nay
+            var todaySales = _orderRepository.GetOrdersByDateRange(today, today, "Paid")
+                .Sum(o => o.FinalAmount);
+
+            // Doanh số hôm qua
+            var yesterdaySales = _orderRepository.GetOrdersByDateRange(yesterday, yesterday, "Paid")
+                .Sum(o => o.FinalAmount);
+
+            // Doanh số 7 ngày qua
+            var lastWeekSales = _orderRepository.GetOrdersByDateRange(lastWeekStart, today, "Paid")
+                .Sum(o => o.FinalAmount);
+
+            // Doanh số 30 ngày qua
+            var lastMonthSales = _orderRepository.GetOrdersByDateRange(lastMonthStart, today, "Paid")
+                .Sum(o => o.FinalAmount);
+
+            // Số đơn hàng hôm nay
+            var todayOrders = _orderRepository.GetOrdersByDateRange(today, today, "Paid").Count;
+
+            // Sản phẩm sắp hết hàng
+            var lowStockCount = _inventoryRepository.GetLowStockProducts().Count;
+
+            var dashboardSummary = new DashboardSummaryDTO
+            {
+                TodaySales = todaySales,
+                YesterdaySales = yesterdaySales,
+                LastWeekSales = lastWeekSales,
+                LastMonthSales = lastMonthSales,
+                TodayOrders = todayOrders,
+                LowStockProductCount = lowStockCount,
+                // Thêm các số liệu khác tùy vào yêu cầu
+            };
+
+            // Lưu vào cache
+            _reportCache[cacheKey] = dashboardSummary;
+            _cacheExpirationTimes[cacheKey] = DateTime.Now.Add(_cacheExpiration);
+
+            return dashboardSummary;
+        }
+
+        public CategorySalesReportDTO GetCategorySalesReport(DateTime startDate, DateTime endDate)
+        {
+            string cacheKey = $"CategorySalesReport_{startDate:yyyyMMdd}_{endDate:yyyyMMdd}";
+
+            // Kiểm tra cache
+            if (_reportCache.ContainsKey(cacheKey) &&
+                _cacheExpirationTimes.ContainsKey(cacheKey) &&
+                _cacheExpirationTimes[cacheKey] > DateTime.Now)
+            {
+                return (CategorySalesReportDTO)_reportCache[cacheKey];
+            }
+
+            // Lấy doanh số theo danh mục
+            var categorySales = _orderRepository.GetCategorySales(startDate, endDate);
+
+            var categorySalesReport = new CategorySalesReportDTO
+            {
+                StartDate = startDate,
+                EndDate = endDate,
+                CategorySales = categorySales.Select(cs => new CategorySalesItemDTO
+                {
+                    CategoryID = cs.CategoryID,
+                    CategoryName = cs.CategoryName,
+                    TotalSales = cs.TotalSales,
+                    Quantity = cs.Quantity,
+                    Profit = cs.Profit,
+                    ProfitMargin = cs.TotalSales > 0 ? (cs.Profit / cs.TotalSales) * 100 : 0,
+                    Percentage = categorySales.Sum(c => c.TotalSales) > 0 ?
+                        (cs.TotalSales / categorySales.Sum(c => c.TotalSales)) * 100 : 0
+                }).ToList()
+            };
+
+            // Lưu vào cache
+            _reportCache[cacheKey] = categorySalesReport;
+            _cacheExpirationTimes[cacheKey] = DateTime.Now.Add(_cacheExpiration);
+
+            return categorySalesReport;
+        }
+
+        // Các phương thức hỗ trợ
+        private List<DailySalesDTO> CalculateDailySales(List<OrderDTO> orders, DateTime startDate, DateTime endDate)
+        {
+            var dailySales = new List<DailySalesDTO>();
+
+            for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
+            {
+                var ordersOnDate = orders.Where(o => o.OrderDate.Date == date.Date).ToList();
+
+                dailySales.Add(new DailySalesDTO
+                {
+                    Date = date,
+                    OrderCount = ordersOnDate.Count,
+                    TotalAmount = ordersOnDate.Sum(o => o.FinalAmount)
+                });
+            }
+
+            return dailySales;
+        }
+
+        private List<ProductSalesDTO> GetTopSellingProducts(DateTime startDate, DateTime endDate, int count)
+        {
+            return _orderRepository.GetTopSellingProducts(startDate, endDate, count);
+        }
+
+        private List<ProductSalesDTO> GetWorstSellingProducts(DateTime startDate, DateTime endDate, int count)
+        {
+            return _orderRepository.GetWorstSellingProducts(startDate, endDate, count);
+        }
+
+        private List<ProductProfitabilityDTO> GetProductsProfitability(DateTime startDate, DateTime endDate, int count)
+        {
+            return _orderRepository.GetProductsProfitability(startDate, endDate, count);
+        }
+
+        private List<PaymentMethodStatsDTO> GetPaymentMethodStats(List<OrderDTO> orders)
+        {
+            return orders
+                .GroupBy(o => new { o.PaymentMethodID, o.PaymentMethod })
+                .Select(g => new PaymentMethodStatsDTO
+                {
+                    MethodID = g.Key.PaymentMethodID,
+                    MethodName = g.Key.PaymentMethod,
+                    OrderCount = g.Count(),
+                    Amount = g.Sum(o => o.FinalAmount),
+                    Percentage = orders.Sum(o => o.FinalAmount) > 0 ?
+                        (g.Sum(o => o.FinalAmount) / orders.Sum(o => o.FinalAmount)) * 100 : 0
+                })
+                .OrderByDescending(p => p.Amount)
+                .ToList();
+        }
+
+        private List<SalesDetailDTO> GetDetailedSales(List<OrderDTO> orders)
+        {
+            return orders.Select(o => new SalesDetailDTO
+            {
+                OrderID = o.OrderID,
+                OrderCode = o.OrderCode,
+                OrderDate = o.OrderDate,
+                CustomerName = o.CustomerName,
+                EmployeeName = o.EmployeeName,
+                TotalAmount = o.FinalAmount,
+                PaymentMethod = o.PaymentMethod,
+                ItemCount = o.ItemCount
+            }).ToList();
+        }
+
+        private List<DailyProfitDTO> CalculateDailyProfits(DateTime startDate, DateTime endDate)
+        {
+            var dailyProfits = new List<DailyProfitDTO>();
+
+            for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
+            {
+                var ordersOnDate = _orderRepository.GetOrdersByDateRange(date, date, "Paid");
+                decimal revenue = ordersOnDate.Sum(o => o.FinalAmount);
+                decimal cost = _orderRepository.GetTotalCostForDate(date);
+
+                dailyProfits.Add(new DailyProfitDTO
+                {
+                    Date = date,
+                    Revenue = revenue,
+                    Cost = cost,
+                    Profit = revenue - cost,
+                    ProfitMargin = revenue > 0 ? ((revenue - cost) / revenue) * 100 : 0
+                });
+            }
+
+            return dailyProfits;
+        }
+
+        private List<CategoryProfitDTO> CalculateCategoryProfits(DateTime startDate, DateTime endDate)
+        {
+            return _orderRepository.GetCategoryProfits(startDate, endDate);
+        }
+
+        private List<InventoryCategoryDTO> GetInventoryByCategory()
+        {
+            var inventoryItems = _inventoryRepository.GetAllInventory();
+            var products = _productRepository.GetAllProducts();
+            var categories = _categoryRepository.GetAllCategories();
+
+            return categories.Select(c => new InventoryCategoryDTO
+            {
+                CategoryID = c.CategoryID,
+                CategoryName = c.CategoryName,
+                ProductCount = products.Count(p => p.CategoryID == c.CategoryID),
+                TotalQuantity = inventoryItems
+                    .Where(i => products.Any(p => p.ProductID == i.ProductID && p.CategoryID == c.CategoryID))
+                    .Sum(i => i.Quantity),
+                TotalValue = inventoryItems
+                    .Where(i => products.Any(p => p.ProductID == i.ProductID && p.CategoryID == c.CategoryID))
+                    .Sum(i => i.Quantity * (products.FirstOrDefault(p => p.ProductID == i.ProductID)?.CostPrice ?? 0))
+            }).ToList();
+        }
+
+        // Phương thức xóa cache
+        public void ClearReportCache()
+        {
+            _reportCache.Clear();
+            _cacheExpirationTimes.Clear();
         }
     }
 }

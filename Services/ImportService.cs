@@ -8,6 +8,8 @@ using System.Linq;
 using QuanLyCuaHangTienLoi.Db.Repositories;
 using QuanLyCuaHangTienLoi.Models.Entities;
 using QuanLyCuaHangTienLoi.Models.DTO;
+using QuanLyCuaHangTienLoi.Services.Interfaces;
+using Serilog;
 
 namespace QuanLyCuaHangTienLoi.Services
 {

@@ -5,6 +5,8 @@ using QuanLyCuaHangTienLoi.Models.Entities;
 using QuanLyCuaHangTienLoi.Models.DTO;
 using QuanLyCuaHangTienLoi.Db.Repositories;
 using QuanLyCuaHangTienLoi.Utils;
+using Microsoft.Extensions.Logging;
+using QuanLyCuaHangTienLoi.Db;
 
 namespace QuanLyCuaHangTienLoi.Services
 {

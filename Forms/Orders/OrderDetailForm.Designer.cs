@@ -1,4 +1,4 @@
-﻿namespace QuanLyCuaHangTienLoi.Forms
+﻿namespace QuanLyCuaHangTienLoi.Forms.Orders
 {
     partial class OrderDetailForm
     {

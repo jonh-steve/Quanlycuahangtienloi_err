@@ -45,6 +45,12 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>packages\EntityFramework.6.5.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="EPPlus, Version=8.0.3.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <HintPath>packages\EPPlus.8.0.3\lib\net462\EPPlus.dll</HintPath>
+    </Reference>
+    <Reference Include="EPPlus.Interfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=a694d7f3b0907a61, processorArchitecture=MSIL">
+      <HintPath>packages\EPPlus.Interfaces.8.0.0\lib\net462\EPPlus.Interfaces.dll</HintPath>
+    </Reference>
     <Reference Include="itextsharp, Version=5.5.13.4, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
       <HintPath>packages\iTextSharp.5.5.13.4\lib\net461\itextsharp.dll</HintPath>
     </Reference>
@@ -90,6 +96,9 @@
     <Reference Include="Microsoft.Extensions.Primitives, Version=9.0.0.4, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Extensions.Primitives.9.0.4\lib\net462\Microsoft.Extensions.Primitives.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.IO.RecyclableMemoryStream.3.0.1\lib\netstandard2.0\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.ReportViewer.Common, Version=11.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Reporting.WinForms.v11.1.0.0.0\lib\Microsoft.ReportViewer.Common.dll</HintPath>
     </Reference>
@@ -107,9 +116,15 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="Serilog, Version=4.2.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>packages\Serilog.4.2.0\lib\net471\Serilog.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel.Annotations, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.ComponentModel.Annotations.5.0.0\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -127,6 +142,13 @@
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security" />
+    <Reference Include="System.Security.Cryptography.Xml, Version=8.0.0.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Security.Cryptography.Xml.8.0.2\lib\net462\System.Security.Cryptography.Xml.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Channels, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Threading.Channels.8.0.0\lib\net462\System.Threading.Channels.dll</HintPath>
     </Reference>
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
@@ -165,21 +187,128 @@
     <Compile Include="Config\AppSettings.cs" />
     <Compile Include="Db\BaseRepository.cs" />
     <Compile Include="Db\ConnectionManager.cs" />
+    <Compile Include="Db\DbMaintenanceService.cs" />
     <Compile Include="Db\Logger.cs" />
     <Compile Include="Db\Repositories\AccountRepository.cs" />
     <Compile Include="Db\Repositories\CategoryRepository.cs" />
     <Compile Include="Db\Repositories\CustomerRepository.cs" />
+    <Compile Include="Db\Repositories\ExpenseRepository.cs" />
     <Compile Include="Db\Repositories\IAccountRepository.cs" />
     <Compile Include="Db\Repositories\ICategoryRepository.cs" />
     <Compile Include="Db\Repositories\ICustomerRepository.cs" />
+    <Compile Include="Db\Repositories\IExpenseRepository.cs" />
     <Compile Include="Db\Repositories\IInventoryRepository.cs" />
     <Compile Include="Db\Repositories\ImportRepository.cs" />
-    <Compile Include="Db\Repositories\InventoryRepository.cs" />
-    <Compile Include="Db\Repositories\IReportRepository.cs" />
-    <Compile Include="Forms\Admin\SystemConfigForm.cs">
+    <Compile Include="Db\Repositories\INotificationRepository.cs" />
+    <Compile Include="Forms\AboutBoxForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\Admin\SystemConfigForm.Designer.cs">
+    <Compile Include="Forms\AboutBoxForm.Designer.cs">
+      <DependentUpon>AboutBoxForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Controls\NotificationBadge.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\Controls\NotificationBadge.Designer.cs">
+      <DependentUpon>NotificationBadge.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\HelpForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\HelpForm.Designer.cs">
+      <DependentUpon>HelpForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Security\PermissionManagerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Security\PermissionManagerForm.Designer.cs">
+      <DependentUpon>PermissionManagerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Security\SecuritySettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Security\SecuritySettingsForm.Designer.cs">
+      <DependentUpon>SecuritySettingsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Systems\PerformanceMonitorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Systems\PerformanceMonitorForm.Designer.cs">
+      <DependentUpon>PerformanceMonitorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\UpdateChecker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\UpdateChecker.Designer.cs">
+      <DependentUpon>UpdateChecker.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\UpdateForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\UpdateForm.Designer.cs">
+      <DependentUpon>UpdateForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Utilities\ImportExportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Utilities\ImportExportForm.Designer.cs">
+      <DependentUpon>ImportExportForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Utilities\NotificationCenterForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Utilities\NotificationCenterForm.Designer.cs">
+      <DependentUpon>NotificationCenterForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Utilities\ThemeCustomizationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Utilities\ThemeCustomizationForm.Designer.cs">
+      <DependentUpon>ThemeCustomizationForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Utilities\UserManualForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Utilities\UserManualForm.Designer.cs">
+      <DependentUpon>UserManualForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Services\INotificationService.cs" />
+    <Compile Include="Db\Repositories\InventoryRepository.cs" />
+    <Compile Include="Db\Repositories\IReportRepository.cs" />
+    <Compile Include="Db\Repositories\ISystemConfigRepository.cs" />
+    <Compile Include="Db\Repositories\NotificationRepository.cs" />
+    <Compile Include="Forms\Systems\BackupScheduleForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Systems\BackupScheduleForm.Designer.cs">
+      <DependentUpon>BackupScheduleForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Systems\DatabaseBackupForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Systems\DatabaseBackupForm.Designer.cs">
+      <DependentUpon>DatabaseBackupForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Systems\SystemLogViewerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Systems\SystemLogViewerForm.Designer.cs">
+      <DependentUpon>SystemLogViewerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Systems\UserActivityLogForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Systems\UserActivityLogForm.Designer.cs">
+      <DependentUpon>UserActivityLogForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Models\DTO\NotificationDTO.cs" />
+    <Compile Include="Models\Entities\Notification.cs" />
+    <Compile Include="Services\ISystemConfigService.cs" />
+    <Compile Include="Db\Repositories\SystemConfigRepository.cs" />
+    <Compile Include="Forms\Systems\SystemConfigForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Systems\SystemConfigForm.Designer.cs">
       <DependentUpon>SystemConfigForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\Controls\CustomerQuickAddControl.cs">
@@ -218,6 +347,30 @@
     <Compile Include="Forms\Customers\CustomerInfoForm.Designer.cs">
       <DependentUpon>CustomerInfoForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Expenses\ExpenseDetailForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Expenses\ExpenseDetailForm.Designer.cs">
+      <DependentUpon>ExpenseDetailForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Expenses\ExpenseListForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Expenses\ExpenseListForm.Designer.cs">
+      <DependentUpon>ExpenseListForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Expenses\ExpenseReportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Expenses\ExpenseReportForm.Designer.cs">
+      <DependentUpon>ExpenseReportForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Expenses\ExpenseTypeManagementForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Expenses\ExpenseTypeManagementForm.Designer.cs">
+      <DependentUpon>ExpenseTypeManagementForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\Inventory\ImportProductForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -248,15 +401,19 @@
     <Compile Include="Forms\Reports\InventoryReportForm.Designer.cs">
       <DependentUpon>InventoryReportForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\Reports\SalesReportForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="Forms\Reports\SalesReportForm.cs" />
     <Compile Include="Forms\Reports\SalesReportForm.Designer.cs">
       <DependentUpon>SalesReportForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\DTO\CategoryDTO.cs" />
+    <Compile Include="Models\DTO\CategorySalesReportDTO.cs" />
     <Compile Include="Models\DTO\CustomerDTO.cs" />
     <Compile Include="Models\DTO\CustomerPointHistoryDTO.cs" />
+    <Compile Include="Models\DTO\DailySalesReportDTO.cs" />
+    <Compile Include="Models\DTO\DashboardSummaryDTO.cs" />
+    <Compile Include="Models\DTO\ProductPerformanceReportDTO.cs" />
+    <Compile Include="Models\DTO\ProductSalesReportDTO.cs" />
+    <Compile Include="Models\DTO\ProfitReportDTO.cs" />
     <Compile Include="Models\DTO\SalesReportDTO.cs" />
     <Compile Include="Models\DTO\SupplierDTO.cs" />
     <Compile Include="Models\Entities\Category.cs" />
@@ -399,7 +556,9 @@
     </Compile>
     <Compile Include="Services\CustomerPointService.cs" />
     <Compile Include="Services\CustomerService.cs" />
+    <Compile Include="Services\ExpenseService.cs" />
     <Compile Include="Services\ICustomerService.cs" />
+    <Compile Include="Services\IExpenseService.cs" />
     <Compile Include="Services\IImportService.cs" />
     <Compile Include="Services\IInventoryService.cs" />
     <Compile Include="Db\Repositories\IImportRepository.cs" />
@@ -544,19 +703,33 @@
     <Compile Include="Services\InventoryService.cs" />
     <Compile Include="Services\IProductService.cs" />
     <Compile Include="Services\IReportService.cs" />
+    <Compile Include="Services\NotificationService.cs" />
     <Compile Include="Services\OrderService.cs" />
     <Compile Include="Services\PaymentProcessor.cs" />
     <Compile Include="Services\ProductService.cs" />
     <Compile Include="Services\ReportService.cs" />
+    <Compile Include="Services\SecurityPolicyService.cs" />
+    <Compile Include="Services\SystemConfigService.cs" />
+    <Compile Include="Services\ThemeService.cs" />
+    <Compile Include="Utils\BackupManager.cs" />
     <Compile Include="Utils\BarcodeScanner.cs" />
+    <Compile Include="Utils\CacheManager.cs" />
     <Compile Include="Utils\Constants.cs" />
+    <Compile Include="Utils\EmailManager.cs" />
+    <Compile Include="Utils\EncryptionManager.cs" />
+    <Compile Include="Utils\ExportManager.cs" />
     <Compile Include="Utils\Extensions.cs" />
     <Compile Include="Utils\Helpers.cs" />
+    <Compile Include="Utils\HelpManager.cs" />
+    <Compile Include="Utils\ImportManager.cs" />
     <Compile Include="Utils\InventoryTransactionLogger.cs" />
+    <Compile Include="Utils\LogManager.cs" />
     <Compile Include="Utils\MapperHelper.cs" />
+    <Compile Include="Utils\PerformanceMonitor.cs" />
     <Compile Include="Utils\ReceiptPrinter.cs" />
     <Compile Include="Utils\ReportExporter.cs" />
     <Compile Include="Utils\Security.cs" />
+    <Compile Include="Services\SecurityAuditService.cs" />
     <Compile Include="Utils\Validators.cs" />
     <EmbeddedResource Include="Forms\Admin\UserManagementForm.resx">
       <DependentUpon>UserManagementForm.cs</DependentUpon>

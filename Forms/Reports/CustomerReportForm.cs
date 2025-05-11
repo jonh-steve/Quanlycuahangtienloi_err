@@ -9,6 +9,7 @@ using QuanLyCuaHangTienLoi.Services;
 using LiveCharts;
 using LiveCharts.Wpf;
 using LiveCharts.WinForms;
+using PieChart = LiveCharts.WinForms.PieChart;
 
 namespace QuanLyCuaHangTienLoi.Forms.Reports
 {

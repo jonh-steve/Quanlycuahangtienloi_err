@@ -353,7 +353,7 @@ namespace QuanLyCuaHangTienLoi.Services
                 // Xử lý hoàn lại tồn kho cho từng sản phẩm
 
                 // Mã giả:
-                /*
+                
                 var orderDetails = _orderRepository.GetOrderDetailsByOrderID(orderID);
                 
                 foreach (var detail in orderDetails)
@@ -386,7 +386,7 @@ namespace QuanLyCuaHangTienLoi.Services
                         _inventoryRepository.UpdateInventoryQuantity(detail.ProductID, inventory.Quantity + detail.Quantity, "Return from cancelled Order #" + orderID, 0);
                     }
                 }
-                */
+                
 
                 return true;
             }

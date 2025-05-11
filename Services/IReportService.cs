@@ -35,5 +35,35 @@ namespace QuanLyCuaHangTienLoi.Services
         // Xuất báo cáo
         bool ExportToExcel(string reportType, DateTime startDate, DateTime endDate, string filePath);
         bool ExportToPdf(string reportType, DateTime startDate, DateTime endDate, string filePath);
+        /// <summary>
+        /// Lấy báo cáo doanh số theo khoảng thời gian
+        /// </summary>
+        SalesReportDTO GetSalesReport(DateTime startDate, DateTime endDate);
+
+        /// <summary>
+        /// Lấy báo cáo lợi nhuận theo khoảng thời gian
+        /// </summary>
+        ProfitReportDTO GetProfitReport(DateTime startDate, DateTime endDate);
+
+        /// <summary>
+        /// Lấy báo cáo hiệu suất sản phẩm theo khoảng thời gian
+        /// </summary>
+        ProductPerformanceReportDTO GetProductPerformanceReport(DateTime startDate, DateTime endDate, int topCount = 20);
+
+        /// <summary>
+        /// Lấy báo cáo tồn kho hiện tại
+        /// </summary>
+        InventoryReportDTO GetInventoryReport();
+
+        /// <summary>
+        /// Lấy thông tin tổng quan cho dashboard
+        /// </summary>
+        DashboardSummaryDTO GetDashboardSummary();
+
+
+        /// <summary>
+        /// Xóa cache báo cáo
+        /// </summary>
+        void ClearReportCache();
     }
 }

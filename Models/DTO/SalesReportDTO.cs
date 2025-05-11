@@ -1,72 +1,59 @@
-﻿using System;
+﻿// File: Models/DTO/SalesReportDTO.cs
+using System;
+using System.Collections.Generic;
 
 namespace QuanLyCuaHangTienLoi.Models.DTO
 {
     public class SalesReportDTO
     {
-        public DateTime ReportDate { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public int TotalOrders { get; set; }
+        public decimal TotalSales { get; set; }
+        public decimal AverageOrderValue { get; set; }
+        public List<DailySalesDTO> DailySales { get; set; } = new List<DailySalesDTO>();
+        public List<ProductSalesDTO> TopProducts { get; set; } = new List<ProductSalesDTO>();
+        public List<PaymentMethodStatsDTO> PaymentMethodStats { get; set; } = new List<PaymentMethodStatsDTO>();
+        public List<SalesDetailDTO> DetailedSales { get; set; } = new List<SalesDetailDTO>();
+    }
+
+    public class DailySalesDTO
+    {
+        public DateTime Date { get; set; }
         public int OrderCount { get; set; }
-        public decimal GrossSales { get; set; }
-        public decimal TotalDiscount { get; set; }
-        public decimal TotalTax { get; set; }
-        public decimal NetSales { get; set; }
-        public int CustomerCount { get; set; }
+        public decimal TotalAmount { get; set; }
+    }
 
-        // Các thuộc tính định dạng
-        public string FormattedDate
-        {
-            get
-            {
-                return ReportDate.ToString("dd/MM/yyyy");
-            }
-        }
+    public class ProductSalesDTO
+    {
+        public int ProductID { get; set; }
+        public string ProductCode { get; set; }
+        public string ProductName { get; set; }
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal TotalAmount { get; set; }
+        public decimal Profit { get; set; }
+        public decimal ProfitMargin { get; set; }
+    }
 
-        public string FormattedWeek
-        {
-            get
-            {
-                return $"Tuần {System.Globalization.CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(ReportDate, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday)}, {ReportDate.Year}";
-            }
-        }
+    public class PaymentMethodStatsDTO
+    {
+        public int MethodID { get; set; }
+        public string MethodName { get; set; }
+        public int OrderCount { get; set; }
+        public decimal Amount { get; set; }
+        public decimal Percentage { get; set; }
+    }
 
-        public string FormattedMonth
-        {
-            get
-            {
-                return ReportDate.ToString("MM/yyyy");
-            }
-        }
-
-        public string FormattedGrossSales
-        {
-            get
-            {
-                return GrossSales.ToString("N0") + " VNĐ";
-            }
-        }
-
-        public string FormattedNetSales
-        {
-            get
-            {
-                return NetSales.ToString("N0") + " VNĐ";
-            }
-        }
-
-        public decimal ProfitRate
-        {
-            get
-            {
-                return NetSales == 0 ? 0 : (NetSales - GrossSales) / GrossSales * 100;
-            }
-        }
-
-        public string FormattedProfitRate
-        {
-            get
-            {
-                return ProfitRate.ToString("0.00") + "%";
-            }
-        }
+    public class SalesDetailDTO
+    {
+        public int OrderID { get; set; }
+        public string OrderCode { get; set; }
+        public DateTime OrderDate { get; set; }
+        public string CustomerName { get; set; }
+        public string EmployeeName { get; set; }
+        public decimal TotalAmount { get; set; }
+        public string PaymentMethod { get; set; }
+        public int ItemCount { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace QuanLyCuaHangTienLoi.Forms.Controls
+﻿namespace QuanLyCuaHangTienLoi.Controls
 {
     partial class CustomerSelectorControl
     {

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using QuanLyCuaHangTienLoi.Models.Entities;
 using QuanLyCuaHangTienLoi.Models.DTO;
+using QuanLyCuaHangTienLoi.Db;
 using QuanLyCuaHangTienLoi.Db.Repositories;
 
 namespace QuanLyCuaHangTienLoi.Services
